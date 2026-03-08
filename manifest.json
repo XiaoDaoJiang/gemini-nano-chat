@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Gemini Nano Chat",
+  "version": "1.0",
+  "description": "基于 Chrome 内置 AI (Gemini Nano) 的本地聊天扩展",
+  "action": {
+    "default_title": "Gemini Chat"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "side_panel": {
+    "default_path": "popup.html"
+  },
+  "permissions": [
+    "storage",
+    "sidePanel"
+  ]
+}

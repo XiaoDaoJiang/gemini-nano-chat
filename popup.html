@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemini Nano Chat</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+  <div class="main-layout">
+    <!-- Sidebar for Sessions -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <button id="new-chat-btn" class="new-chat-btn">
+          <span>+</span> 新建对话
+        </button>
+        <button id="manage-sessions-btn" class="manage-btn" title="批量管理和删除">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" width="16" height="16">
+            <path d="M11 5H21" />
+            <path d="M11 12H21" />
+            <path d="M11 19H21" />
+            <path d="m5 5 2 2 4-4" />
+            <path d="m5 12 2 2 4-4" />
+            <path d="m5 19 2 2 4-4" />
+          </svg>
+        </button>
+      </div>
+      <div id="batch-actions" class="batch-actions hidden">
+        <button id="delete-selected-btn" class="batch-delete-btn" disabled>删除选中 (<span
+            id="selected-count">0</span>)</button>
+      </div>
+      <div id="sessions-list" class="sessions-list">
+        <!-- Session items will be injected here -->
+      </div>
+    </aside>
+
+    <div class="app-container">
+      <header>
+        <div class="header-left">
+          <button id="toggle-sidebar" title="Toggle Sidebar" class="icon-btn">☰</button>
+          <div class="header-title">
+            <div class="status-indicator" id="status-indicator"></div>
+            <h1 id="current-chat-title">Gemini Nano</h1>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button id="reset-btn" title="清空当前对话内存"
+            style="background: transparent; border: none; font-size: 16px; cursor: pointer; color: var(--text-secondary); transition: color 0.2s;"
+            class="hidden">🗑️</button>
+          <button id="settings-btn" title="Settings">⚙️</button>
+        </div>
+      </header>
+
+      <div id="setup-warning" class="hidden">
+        您的浏览器尚未支持或开启内置 AI 模型。<br>
+        请确保您的 Chrome 版本 &ge; 138 并已在 <code>chrome://flags</code> 中开启：<br>
+        - Prompt API for Gemini Nano: Enabled <br>
+        - Optimization Guide On Device Model: Enabled BypassPrefRequirement<br>
+        <br>
+        重启浏览器后请等待模型下载完成。
+      </div>
+
+      <div id="download-container" class="hidden">
+        <div id="download-prompt">
+          <p style="font-size: 13px; margin-bottom: 8px;">模型需要下载才能使用 (大约需 1.5GB)。</p>
+          <button id="start-download-btn" class="action-btn">开始下载模型</button>
+        </div>
+        <div id="download-progress-area" class="hidden" style="display: flex; flex-direction: column; gap: 8px;">
+          <label for="model-progress" class="download-text">正在准备 Gemini Nano 模型...</label>
+          <progress id="model-progress" value="0" style="width: 100%; height: 12px;"></progress>
+          <output id="download-output" class="download-stats"></output>
+        </div>
+      </div>
+
+      <main id="chat-container">
+        <div id="messages">
+          <div class="message assistant greeting">
+            <div class="message-bubble">
+              你好！我是基于 Chrome 内置 AI 的本地助手，所有计算均在本地完成，保护您的隐私。请问有什么我可以帮你的吗？
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer>
+        <form id="chat-form">
+          <textarea id="prompt-input" rows="1" placeholder="输入你想问的内容..."></textarea>
+          <button type="submit" id="send-btn" disabled>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2.01 21L23 12L2.01 3L2 10L17 12L2 14L2.01 21Z" fill="currentColor" />
+            </svg>
+          </button>
+        </form>
+      </footer>
+    </div>
+  </div>
+  <script src="marked.min.js"></script>
+  <script src="popup.js"></script>
+</body>
+
+</html>
