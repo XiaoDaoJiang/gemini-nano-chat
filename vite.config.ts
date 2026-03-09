@@ -17,11 +17,11 @@ export default defineConfig({
           default_title: 'Gemini Chat',
         },
         background: {
-          service_worker: 'background.js',
+          service_worker: 'src/background.js',
           type: 'module',
         },
         side_panel: {
-          default_path: 'popup.html',
+          default_path: 'src/popup.html',
         },
         permissions: [
           'storage',

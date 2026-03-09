@@ -1,3 +1,5 @@
+import { marked } from 'marked';
+
 document.addEventListener('DOMContentLoaded', async () => {
     const messagesContainer = document.getElementById('messages');
     const chatForm = document.getElementById('chat-form');
