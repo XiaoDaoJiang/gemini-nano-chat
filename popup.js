@@ -5,17 +5,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sendBtn = document.getElementById('send-btn');
     const statusIndicator = document.getElementById('status-indicator');
     const setupWarning = document.getElementById('setup-warning');
+    const tokenCountEl = document.getElementById('token-count');
 
     let activeSession = null;
     let isReady = false;
 
-    // Auto-resize textarea
-    promptInput.addEventListener('input', () => {
+    // Auto-resize textarea and measure tokens
+    promptInput.addEventListener('input', async () => {
         promptInput.style.height = 'auto';
         promptInput.style.height = Math.min(promptInput.scrollHeight, 120) + 'px';
+        
         // Only modify disabled state if we are NOT in stop-mode
         if (!sendBtn.classList.contains('stop-mode')) {
             sendBtn.disabled = !promptInput.value.trim() || !isReady;
+        }
+        
+        // Measure token count using official API
+        const text = promptInput.value.trim();
+        if (text && activeSession && typeof activeSession.measureInputUsage === 'function') {
+            try {
+                const usage = await activeSession.measureInputUsage(text);
+                tokenCountEl.textContent = `${usage.inputTokens} tokens`;
+                tokenCountEl.classList.remove('hidden');
+            } catch (e) {
+                // API not available or error
+                tokenCountEl.classList.add('hidden');
+            }
+        } else {
+            tokenCountEl.classList.add('hidden');
         }
     });
 
@@ -234,9 +251,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function switchSession(id) {
         if (id === currentSessionId) return;
 
-        if (activeSession) {
-            activeSession.destroy();
-            activeSession = null;
+        // Clone from base session for faster switching (official best practice)
+        if (baseSession && typeof baseSession.clone === 'function') {
+            try {
+                if (activeSession) {
+                    activeSession.destroy();
+                }
+                activeSession = await baseSession.clone();
+            } catch (e) {
+                console.warn('Session clone failed, creating new session:', e);
+                if (activeSession) {
+                    activeSession.destroy();
+                }
+                activeSession = await createSession();
+            }
+        } else {
+            if (activeSession) {
+                activeSession.destroy();
+            }
+            activeSession = await createSession();
         }
 
         currentSessionId = id;
@@ -249,16 +282,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Re-init
         editingIndex = -1;
         promptInput.value = '';
-        setStatus(false);
-        activeSession = await createSession();
         setStatus(true);
         saveCurrentSession();
     }
 
     document.getElementById('new-chat-btn').addEventListener('click', async () => {
-        if (activeSession) {
-            activeSession.destroy();
-            activeSession = null;
+        // Clone from base session for faster new conversation (official best practice)
+        if (baseSession && typeof baseSession.clone === 'function') {
+            try {
+                activeSession = await baseSession.clone();
+            } catch (e) {
+                console.warn('Session clone failed, creating new session:', e);
+                activeSession = await createSession();
+            }
+        } else {
+            activeSession = await createSession();
         }
 
         currentSessionId = crypto.randomUUID();
@@ -267,8 +305,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const messages = document.querySelectorAll('.message:not(.greeting)');
         messages.forEach(msg => msg.remove());
 
-        setStatus(false);
-        activeSession = await createSession();
         setStatus(true);
         saveCurrentSession();
 
@@ -281,7 +317,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     let aiModel;
-    let localSession = null;
+    let baseSession = null;  // Main session that can be cloned for new conversations
+    let activeSession = null;
     let modelNewlyDownloaded = false;
 
     // Updated saveHistory/loadHistory wrappers
@@ -414,6 +451,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     try {
                         activeSession = await createSession();
+                        // Store as base session for cloning
+                        baseSession = activeSession;
                         downloadContainer.classList.add('hidden');
                         isReady = true;
                         setStatus(true);
@@ -428,6 +467,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             // If already available without download
             try {
                 activeSession = await createSession();
+                // Store as base session for cloning
+                baseSession = activeSession;
                 downloadContainer.classList.add('hidden');
                 isReady = true;
                 setStatus(true);
@@ -587,6 +628,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        // Hide token count when submitting
+        if (tokenCountEl) {
+            tokenCountEl.classList.add('hidden');
+        }
 
         // If we are currently generating, act as a Stop button
         if (abortController) {

@@ -87,7 +87,10 @@
 
       <footer>
         <form id="chat-form">
-          <textarea id="prompt-input" rows="1" placeholder="输入你想问的内容..."></textarea>
+          <div class="input-container">
+            <textarea id="prompt-input" rows="1" placeholder="输入你想问的内容..."></textarea>
+            <span id="token-count" class="token-count hidden"></span>
+          </div>
           <button type="submit" id="send-btn" disabled>
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M2.01 21L23 12L2.01 3L2 10L17 12L2 14L2.01 21Z" fill="currentColor" />

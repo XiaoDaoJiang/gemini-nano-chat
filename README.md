@@ -6,11 +6,71 @@ A Chrome extension for local chat powered by Chrome's built-in AI (Gemini Nano).
 
 Gemini Nano Chat is a Chrome extension that provides a local chat interface powered by Gemini Nano, Chrome's on-device AI model. The extension runs entirely in the browser with no server dependencies.
 
+This extension follows the official Chrome built-in AI best practices, including:
+- Session cloning for efficient multi-conversation management
+- Token counting via `measureInputUsage()` API
+- Streaming responses for better UX
+
 ## Features
 
 - **Local AI Chat**: Powered by Chrome's Gemini Nano for on-device inference
 - **Markdown Support**: Renders Markdown messages beautifully
 - **Side Panel Interface**: Conveniently accessible from the browser's side panel
+- **Session Cloning**: Fast conversation switching using official best practices
+- **Token Count**: Real-time token usage display
+
+## Official API Usage
+
+This extension uses the Chrome built-in AI Prompt API. Below are key patterns from the official documentation:
+
+### Checking Availability
+
+```javascript
+const available = await LanguageModel.availability({
+  expectedInputs: [{ type: 'text', languages: ['en'] }],
+  expectedOutputs: [{ type: 'text', languages: ['en'] }]
+});
+if (available !== 'unavailable') {
+  // Model is available
+}
+```
+
+### Creating a Session
+
+```javascript
+const session = await LanguageModel.create({
+  monitor(m) {
+    m.addEventListener('downloadprogress', (e) => {
+      console.log(`Downloaded ${e.loaded * 100}%`);
+    });
+  }
+});
+```
+
+### Session Cloning (Best Practice)
+
+Instead of destroying and recreating sessions, use cloning for faster context switching:
+
+```javascript
+// Clone a session for new conversations
+const newSession = await mainSession.clone();
+```
+
+### Streaming Responses
+
+```javascript
+const stream = session.promptStreaming('Your prompt here');
+for await (const chunk of stream) {
+  console.log(chunk); // Process partial results
+}
+```
+
+### Token Counting
+
+```javascript
+const usage = await session.measureInputUsage('Your text here');
+console.log(usage.inputTokens); // Number of input tokens
+```
 
 ## File Structure
 
@@ -37,10 +97,23 @@ Gemini Nano Chat is a Chrome extension that provides a local chat interface powe
 
 ## Requirements
 
-- Chrome browser with Gemini Nano support (most recent versions)
+- Chrome browser with Gemini Nano support (Chrome 138+ recommended)
 - Developer mode enabled for extension installation
+
+### Enabling Chrome Built-in AI
+
+If the model is not available, enable these flags in `chrome://flags`:
+
+- **Prompt API for Gemini Nano**: Enabled
+- **Optimization Guide On Device Model**: Enabled BypassPrefRequirement
 
 ## Permissions
 
 - `storage` - For storing extension settings
 - `sidePanel` - For displaying the chat interface
+
+## References
+
+- [Chrome Built-in AI Documentation](https://developer.chrome.com/docs/ai/get-started)
+- [The Prompt API](https://developer.chrome.com/docs/ai/prompt-api)
+- [Session Management Best Practices](https://developer.chrome.com/docs/ai/session-management)
