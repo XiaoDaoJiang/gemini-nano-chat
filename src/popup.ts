@@ -318,7 +318,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let aiModel;
     let baseSession = null;  // Main session that can be cloned for new conversations
-    let activeSession = null;
     let modelNewlyDownloaded = false;
 
     // Updated saveHistory/loadHistory wrappers

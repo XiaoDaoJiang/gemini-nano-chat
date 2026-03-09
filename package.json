@@ -1,0 +1,27 @@
+{
+  "name": "gemini-nano-chat",
+  "version": "1.0.0",
+  "description": "A Chrome extension for local chat powered by Chrome's built-in AI (Gemini Nano).",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/XiaoDaoJiang/gemini-nano-chat.git"
+  },
+  "keywords": ["chrome-extension", "gemini-nano", "ai"],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/XiaoDaoJiang/gemini-nano-chat/issues"
+  },
+  "homepage": "https://github.com/XiaoDaoJiang/gemini-nano-chat#readme",
+  "devDependencies": {
+    "vite": "^5.4.0",
+    "@crxjs/vite-plugin": "^2.0.0",
+    "typescript": "^5.0.0"
+  }
+}
